@@ -5,8 +5,13 @@ right_array = Enum.drop_every(split_ints, 2) |> Enum.sort()
 
 part1 = Enum.zip(left_array, right_array) |> Enum.map(fn {x, y} -> abs(x - y) end) |> Enum.sum()
 
+value_map =
+  Enum.reduce(right_array, %{}, fn value, accumulator ->
+    Map.update(accumulator, value, 1, &(&1 + 1))
+  end)
+
 part2 =
-  Enum.map(left_array, fn x -> x * (Enum.filter(right_array, fn y -> x == y end) |> length) end)
+  Enum.map(left_array, fn x -> x * Map.get(value_map, x, 0) end)
   |> Enum.sum()
 
 IO.puts(part1)
