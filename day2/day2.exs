@@ -5,10 +5,6 @@ split_int_arrays =
   |> String.split(["\n", "\r", "\r\n"], trim: true)
   |> Enum.map(fn x -> String.split(x, " ", trim: true) |> Enum.map(&String.to_integer/1) end)
 
-defmodule Extract do
-  def extract({:ok, term}), do: term
-end
-
 defmodule Main do
   def is_report_safe(array) do
     chunked_array = array |> Enum.chunk_every(2, 1, :discard)
@@ -29,8 +25,6 @@ defmodule Permutations do
     do: Enum.reduce(array, [array], fn x, accumulator -> [array -- [x] | accumulator] end)
 end
 
-Permutations.get([1, 2, 3, 4, 5]) |> IO.inspect()
-
 part1 =
   split_int_arrays
   |> Enum.reduce(0, fn x, accumulator ->
@@ -42,7 +36,7 @@ part1 =
 part2 =
   split_int_arrays
   |> Enum.reduce(0, fn array, accumulator ->
-    if Enum.reduce(Permutations.get(array), false, fn x, is_safe ->
+    if Enum.reduce(array |> Permutations.get(), false, fn x, is_safe ->
          is_safe || Main.is_report_safe(x)
        end),
        do: accumulator + 1,
