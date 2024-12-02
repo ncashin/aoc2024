@@ -10,25 +10,26 @@ defmodule Extract do
 end
 
 defmodule Main do
-  def is_report_safe(array),
-    do:
-      array
-      |> Enum.chunk_every(2, 1, :discard)
-      |> Enum.map(fn [x, y] -> y - x end)
-      |> then(
-        &Enum.reduce(&1, {Extract.extract(Enum.fetch(&1, 0)), true}, fn z, {diff, is_safe} ->
-          same_dir = z > 0 == diff > 0
-          in_range = 0 < abs(z) && abs(z) < 4
-          {z, is_safe && same_dir && in_range}
-        end)
+  def is_report_safe(array) do
+    chunked_array = array |> Enum.chunk_every(2, 1, :discard)
+
+    length(chunked_array) ==
+      abs(
+        chunked_array
+        |> Enum.map(fn [x, y] -> y - x end)
+        |> Enum.filter(&(0 < abs(&1) && abs(&1) < 4))
+        |> Enum.map(&if &1 >= 0, do: 1, else: -1)
+        |> Enum.sum()
       )
-      |> elem(1)
+  end
 end
 
 defmodule Permutations do
   def get(array),
     do: Enum.reduce(array, [array], fn x, accumulator -> [array -- [x] | accumulator] end)
 end
+
+Permutations.get([1, 2, 3, 4, 5]) |> IO.inspect()
 
 part1 =
   split_int_arrays
@@ -41,8 +42,8 @@ part1 =
 part2 =
   split_int_arrays
   |> Enum.reduce(0, fn array, accumulator ->
-    if Enum.reduce(Permutations.get(array), false, fn x, correct_perm ->
-         correct_perm || Main.is_report_safe(x)
+    if Enum.reduce(Permutations.get(array), false, fn x, is_safe ->
+         is_safe || Main.is_report_safe(x)
        end),
        do: accumulator + 1,
        else: accumulator
