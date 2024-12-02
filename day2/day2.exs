@@ -18,10 +18,8 @@ defmodule Main do
         |> Enum.sum()
       )
   end
-end
 
-defmodule Permutations do
-  def get(array),
+  def get_possible_dampened_reports(array),
     do: Enum.reduce(array, [array], fn x, accumulator -> [array -- [x] | accumulator] end)
 end
 
@@ -36,7 +34,7 @@ part1 =
 part2 =
   split_int_arrays
   |> Enum.reduce(0, fn array, accumulator ->
-    if Enum.reduce(array |> Permutations.get(), false, fn x, is_safe ->
+    if Enum.reduce(array |> Main.get_possible_dampened_reports(), false, fn x, is_safe ->
          is_safe || Main.is_report_safe(x)
        end),
        do: accumulator + 1,
