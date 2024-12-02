@@ -2,8 +2,8 @@
 
 split_int_arrays =
   input
-  |> String.split(["\n", "\r", "\r\n"], trim: true)
-  |> Enum.map(fn x -> String.split(x, " ", trim: true) |> Enum.map(&String.to_integer/1) end)
+  |> String.split("\n", trim: true)
+  |> Enum.map(fn x -> String.split(x) |> Enum.map(&String.to_integer/1) end)
 
 defmodule Main do
   def is_report_safe(array) do
@@ -13,14 +13,17 @@ defmodule Main do
       abs(
         chunked_array
         |> Enum.map(fn [x, y] -> y - x end)
-        |> Enum.filter(&(0 < abs(&1) && abs(&1) < 4))
-        |> Enum.map(&if &1 >= 0, do: 1, else: -1)
+        |> Enum.filter(&(0 != &1 && abs(&1) < 4))
+        |> Enum.map(&if &1 > 0, do: 1, else: -1)
         |> Enum.sum()
       )
   end
 
   def get_possible_dampened_reports(array),
-    do: Enum.reduce(array, [array], fn x, accumulator -> [array -- [x] | accumulator] end)
+    do:
+      Enum.reduce(array, [array], fn x, accumulator ->
+        [array -- [x] | accumulator]
+      end)
 end
 
 part1 =
@@ -41,5 +44,5 @@ part2 =
        else: accumulator
   end)
 
-IO.puts(part1)
-IO.puts(part2)
+IO.puts("Part 1: #{part1}")
+IO.puts("Part 2: #{part2}")

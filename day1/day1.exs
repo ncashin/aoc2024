@@ -14,5 +14,5 @@ part2 =
   Enum.map(left_array, fn x -> x * Map.get(right_number_of_occurences, x, 0) end)
   |> Enum.sum()
 
-IO.puts(part1)
-IO.puts(part2)
+IO.puts("Part 1: #{part1}")
+IO.puts("Part 2: #{part2}")
