@@ -21,8 +21,8 @@ defmodule Main do
 
   def get_possible_dampened_reports(array),
     do:
-      Enum.reduce(array, [array], fn x, accumulator ->
-        [array -- [x] | accumulator]
+      Enum.reduce(0..(length(array) - 1), [array], fn x, accumulator ->
+        [List.delete_at(array, x) | accumulator]
       end)
 end
 
@@ -37,6 +37,12 @@ part1 =
 part2 =
   split_int_arrays
   |> Enum.reduce(0, fn array, accumulator ->
+    IO.inspect(
+      Enum.reduce(array |> Main.get_possible_dampened_reports(), false, fn x, is_safe ->
+        is_safe || Main.is_report_safe(x)
+      end)
+    )
+
     if Enum.reduce(array |> Main.get_possible_dampened_reports(), false, fn x, is_safe ->
          is_safe || Main.is_report_safe(x)
        end),
