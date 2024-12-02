@@ -3,7 +3,7 @@
 split_int_arrays =
   input
   |> String.split("\n", trim: true)
-  |> Enum.map(fn x -> String.split(x) |> Enum.map(&String.to_integer/1) end)
+  |> Enum.map(fn line -> line |> String.split(" ") |> Enum.map(&String.to_integer/1) end)
 
 defmodule Main do
   def is_report_safe(array) do
