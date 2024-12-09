@@ -15,7 +15,6 @@ page_ordering_map =
   |> Enum.reduce(Map.new(), fn [k, v], map ->
     map |> Map.update(k, [v], fn ev -> [v | ev] end)
   end)
-  |> IO.inspect()
 
 page_lists =
   lists
@@ -48,7 +47,24 @@ part1 =
       else: acc
   end)
 
-part2 = ""
+part2 =
+  (page_lists
+   |> Enum.map(fn page_list ->
+     page_list
+     |> Enum.sort(fn a, b ->
+       page_ordering_map[a] != nil &&
+         page_ordering_map[a]
+         |> Enum.reduce(false, fn number, acc ->
+           acc || number == b
+         end)
+     end)
+     |> then(fn list ->
+       IO.inspect(list)
+       {:ok, value} = list |> Enum.fetch(floor(length(list) / 2))
+       value
+     end)
+   end)
+   |> Enum.sum()) - part1
 
 IO.puts("Part 1: #{part1}")
 IO.puts("Part 2: #{part2}")
