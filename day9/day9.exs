@@ -54,71 +54,6 @@ defmodule CLI do
     |> Enum.sort(fn {a, _}, {b, _} -> a < b end)
     |> Enum.filter(fn {_, v} -> v != "." end)
   end
-
-  def chunk_traverse_front(file, back_index, file_size, front_index, free_size, prev_id) do
-    id = file[front_index]
-    id_change = id != prev_id
-
-    cond do
-      prev_id == "." && id_change && free_size >= file_size ->
-        front_index - free_size
-
-      id == nil ->
-        nil
-
-      id == "." ->
-        chunk_traverse_front(file, back_index, file_size, front_index + 1, free_size + 1, id)
-
-      id != "." ->
-        chunk_traverse_front(file, back_index, file_size, front_index + 1, 1, id)
-    end
-  end
-
-  def chunk_traverse_back(file, back_index, file_size, prev_id) do
-    id = file[back_index]
-    id_change = id != prev_id
-
-    cond do
-      id_change && prev_id != "." ->
-        IO.inspect({"HIT", file_size})
-        free_space_index = chunk_traverse_front(file, back_index, file_size, 0, 0, nil)
-
-        if free_space_index != nil do
-          IO.inspect({free_space_index, file_size})
-
-          0..file_size
-          |> Enum.reduce(file, fn value, file ->
-            file
-            |> Map.put(free_space_index + value, file[back_index - value])
-            |> Map.put(back_index + value, ".")
-          end)
-          |> CLI.print_file()
-          |> chunk_traverse_back(back_index - 1, 1, id)
-        else
-          chunk_traverse_back(file, back_index - 1, 1, id)
-        end
-
-      id == nil ->
-        file
-
-      !id_change ->
-        chunk_traverse_back(file, back_index - 1, file_size + 1, id)
-
-      id_change ->
-        chunk_traverse_back(file, back_index - 1, 1, id)
-    end
-  end
-
-  def webp(file) do
-    file |> CLI.print_file()
-
-    file
-    |> CLI.chunk_traverse_back(map_size(file) - 1, 1, file[0])
-    |> IO.inspect()
-    |> Enum.map(fn {k, v} -> {k, v} end)
-    |> Enum.sort(fn {a, _}, {b, _} -> a < b end)
-    |> Enum.filter(fn {_, v} -> v != "." end)
-  end
 end
 
 file_map_array =
@@ -152,9 +87,13 @@ part1 =
   |> Enum.reduce(0, fn {index, id}, total -> total + index * id end)
 
 part2 =
-  expanded_file_map
-  |> CLI.webp()
-  |> Enum.reduce(0, fn {index, id}, total -> total + index * id end)
+  Stream.iterate(0, &(&1 + 1))
+  |> Enum.zip(file_map_array)
+  |> Map.new()
+  |> Enum.map(fn {key, value} -> {key, {value, if key % 2 == 0, do: floor(key / 2), else: nil}} end)
+  |> IO.inspect()
+
+# |> Enum.reduce(file_map_array, fn {index, id}, compressed_array -> total + index * id end)
 
 IO.puts("Part 1: #{part1}")
 IO.puts("Part 2: #{part2}")

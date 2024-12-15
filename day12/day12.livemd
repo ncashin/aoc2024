@@ -1,0 +1,84 @@
+# Untitled notebook
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.14.2"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("Please paste your input file")
+```
+
+```elixir
+unwrap = fn x -> 
+  {:ok, value} = x
+  value
+end
+
+defmodule Farmville do
+  def get_grid_value(grid, x, y) do
+    if y < 0 || y > length(grid) || x < 0 || x > length(grid |> Enum.at(y)) do
+      nil    
+    else
+      grid |> Enum.at(y) |> Enum.at(x)
+    end
+  end
+  def find_stuff(grid, value, x, y, set) do
+    if set |> MapSet.member?({x, y}) do
+      {0, 0}
+    else
+      {val_array, area, _} = [
+      {x + 1, y},
+      {x - 1, y},
+      {x, y + 1},
+      {x, y - 1}
+    ] 
+    |> Enum.reduce({[], 0, set |> MapSet.put({x, y})}, fn point, {val_array, area, set} ->
+      {adj_x, adj_y} = point
+      IO.inspect(point)
+      grid_value = grid |> get_grid_value(adj_x, adj_y)
+      IO.inspect(grid_value)
+      if grid_value == value do
+        IO.inspect("HIT")
+        {value, a} = find_stuff(grid, value, adj_x, adj_y, set)
+        {
+          [value - 1 | val_array], 
+          area + a,
+          set
+        }
+      else 
+        {val_array, area, set}
+      end
+    end
+    ) 
+
+    {(val_array |> Enum.sum()) + 4, area + 1}
+    end
+    
+  end
+end
+
+grid = input 
+  |> Kino.Input.read() 
+  |> String.split("\n")
+  |> Enum.map(&String.graphemes/1)
+"
+{_, _, total, _} = grid |> Enum.reduce({0, -1, 0, MapSet.new()}, fn array, {x, y, total, mapset} -> 
+  array |> Enum.reduce({x, y + 1, total, mapset}, fn value, {x, y, acc, set} -> 
+      if !(set |> MapSet.member?(value)) do 
+        {perimeter, area} = Farmville.find_stuff(grid, value, 0, 0, MapSet.new())
+        IO.inspect({perimeter, area, value})
+        {x + 1, y, acc + (perimeter * area), set |> MapSet.put(value)}
+      else 
+        {x + 1, y, acc, set}
+      end
+    end) 
+  end)
+
+total"
+
+Farmville.find_stuff(grid, "R", 0, 0, MapSet.new())
+```

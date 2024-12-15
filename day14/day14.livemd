@@ -1,0 +1,140 @@
+# aocday14
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.14.2"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("Please paste your input file")  
+```
+
+```elixir
+width = 101
+height = 103
+
+middle_x = floor(width / 2)
+middle_y = floor(height / 2)
+
+time_before_bathroom = 100
+"declare constants"
+```
+
+```elixir
+robots =
+  Regex.scan(~r/-?\d+/, input |> Kino.Input.read())
+  |> List.flatten()
+  |> Enum.map(&String.to_integer/1)
+  |> Enum.chunk_every(4)
+
+```
+
+```elixir
+defmodule RobotTime do
+def move_robots(robits) do robits |> Enum.map(fn [x, y, vx, vy] ->
+  width = 101
+  height = 103
+  
+      [Integer.mod(x + vx, width), Integer.mod(y + vy, height), vx, vy]
+end) end 
+
+def robot_to_string(robots) do 
+  width = 101
+  height = 103
+
+  
+  
+  robots |> Enum.reduce(
+  Map.new(
+    Enum.zip(
+      0..(height - 1),
+      0..(height - 1)
+      |> Enum.map(fn _ ->
+        Map.new(Enum.zip(0..(width - 1), 0..(width - 1) |> Enum.map(fn _ -> "." end)))
+      end)
+    )
+  ),
+  fn [x, y, _, _], map ->
+    map |> Map.update(y, ".", fn value -> value |> Map.put(x, "#") end)
+  end
+  ) |> Enum.map(fn {key, value} ->  
+    {key, value |> Enum.map(fn {key, v} -> {key, v} end) |> Enum.sort()} end) |> Enum.sort()
+  |> Enum.reduce("", fn {_, value}, acc -> 
+    (value |> Enum.reduce(acc, fn {_, v}, a -> a <> v end)) <> "\n"
+    end
+  )
+ end end
+
+"define funcs"
+
+robots |> RobotTime.robot_to_string() |> IO.puts()
+
+```
+
+```elixir
+ 
+```
+
+
+
+```elixir
+
+```
+
+```elixir
+foo = fn y ->
+  if y < middle_y do
+    "top"
+  else
+    "bottom"
+  end
+end
+
+ 1..time_before_bathroom
+  |> Enum.reduce(robots, fn _, robot_acc ->
+    robot_acc
+    |> RobotTime.move_robots()
+  end) 
+  |> Enum.filter(fn [x, y, _, _] ->
+    x != middle_x &&
+      y != middle_y
+  end)
+  |> Enum.group_by(fn [x, y, _, _] ->
+    if x < middle_x do
+      "left_" <> foo.(y)
+    else
+      "right_" <> foo.(y)
+    end
+  end)
+  |> Enum.map(fn {key, value} -> {key, value |> Enum.count()} end)
+  |> Enum.reduce(1, fn {_, value}, acc -> value * acc end)
+```
+
+```elixir
+depth = 7000
+deep_range_robots = 1..depth
+  |> Enum.reduce(robots, fn _, robot_acc ->
+    robot_acc
+    |> RobotTime.move_robots()
+  end)
+
+defmodule GatoRoboto do
+  def move_until_seems_right(robots, i) do
+    IO.puts(i)
+    if i > 8000 || Regex.match?(~r/###############/, RobotTime.robot_to_string(robots))  do
+      robots
+    else
+      robots |> RobotTime.move_robots() |> move_until_seems_right(i + 1)
+    end
+  end
+end
+
+
+string = deep_range_robots |>GatoRoboto.move_until_seems_right(depth)
+|> RobotTime.robot_to_string()
+
+"<pre><code>#{string}<\code><\pre>" |> Kino.HTML.new()
+```

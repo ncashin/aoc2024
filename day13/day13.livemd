@@ -1,0 +1,52 @@
+# aocday13
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.14.2"}
+])
+```
+
+## Section
+
+```elixir
+input = Kino.Input.textarea("Please paste your input file")  
+```
+
+```elixir
+claw_machines = Regex.scan(~r/-?\d+/, input |> Kino.Input.read()) 
+  |> List.flatten()
+  |> Enum.map(&String.to_integer/1)
+  |> Enum.chunk_every(6)
+
+```
+
+```elixir
+claw_machines |> Enum.map(fn [a, c, b, d, e, f] ->
+
+  x = round(((e * d) - (b * f)) / ((a * d) - (b * c)))
+  y = round(((a * f) - (e * c)) / ((a * d) - (b * c)))
+
+  if x * a + y * b == e && x * c + y * d == f do
+    x * 3 + y
+  else
+    0
+  end
+  end) |> Enum.sum()
+```
+
+```elixir
+claw_machines |> Enum.map(fn [a, c, b, d, e, f] ->
+
+  new_goal_1 = e + 10000000000000
+  new_goal_2 = f + 10000000000000
+  
+  x = round(((new_goal_1 * d) - (b * new_goal_2)) / ((a * d) - (b * c)))
+  y = round(((a * new_goal_2) - (new_goal_1 * c)) / ((a * d) - (b * c)))
+
+  if x * a + y * b == new_goal_1 && x * c + y * d == new_goal_2 do
+    x * 3 + y
+  else
+    0
+  end
+  end) |> Enum.sum()
+```
