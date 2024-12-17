@@ -135,6 +135,17 @@ defmodule Bobot do
           {".", "."} ->
             grid |> right_move_func.()
 
+          {"[", "]"} ->
+            new_grid_1 =
+              grid
+              |> Bobot.expanded_move_push_recursive(x + dx, y + dy, dx, dy)
+
+            if new_grid_1 == grid do
+              grid
+            else
+              new_grid_1 |> right_move_func.()
+            end
+
           {"]", "["} ->
             new_grid_1 =
               grid
@@ -150,7 +161,7 @@ defmodule Bobot do
               if new_grid_2 == new_grid_1 do
                 grid
               else
-                new_grid_2 |> right_move_func.()
+                right_move_func.(new_grid_2)
               end
             end
 
@@ -184,6 +195,17 @@ defmodule Bobot do
         case {grid |> Griddy.get(x + dx, y + dy), grid |> Griddy.get(x + dx + 1, y + dy)} do
           {".", "."} ->
             left_move_func.(grid)
+
+          {"[", "]"} ->
+            new_grid_1 =
+              grid
+              |> Bobot.expanded_move_push_recursive(x + dx, y + dy, dx, dy)
+
+            if new_grid_1 == grid do
+              grid
+            else
+              new_grid_1 |> left_move_func.()
+            end
 
           {"]", "["} ->
             new_grid_1 =
@@ -230,13 +252,13 @@ defmodule Bobot do
             grid
         end
 
-      {_, _, _} ->
+      _ ->
         normal_func.()
     end
   end
 end
 
-{:ok, input} = File.read("testinput.txt")
+{:ok, input} = File.read("input.txt")
 
 [raw_map, directions] = input |> String.split("\n\n", trim: true)
 
@@ -318,20 +340,14 @@ expanded_grid =
     end
   end)
   |> Griddy.new_from_string()
-  |> Griddy.print()
 
 {x2, y2} =
   expanded_grid
   |> Griddy.find("@")
 
-IO.inspect({x2, y2})
-
 part2 =
   dir_array
-  |> IO.inspect()
   |> Enum.reduce({expanded_grid, x2, y2}, fn direction, {grid, x, y} ->
-    File.write("log.txt", "\n\n" <> direction <> (grid |> Griddy.to_string()) <> "\n", [:append])
-
     case direction do
       "^" ->
         updated_grid = grid |> Bobot.expanded_move_push_recursive(x, y, 0, -1)
